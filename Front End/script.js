@@ -1,0 +1,438 @@
+/* ==========================================
+   TRAFFICAI — SCRIPT.JS
+   ========================================== */
+
+// ---- CURSOR PERSONALIZADO ---- //
+const cursor = document.getElementById('cursor');
+const cursorTrail = document.getElementById('cursorTrail');
+let mouseX = 0, mouseY = 0;
+
+document.addEventListener('mousemove', (e) => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  cursor.style.left = mouseX + 'px';
+  cursor.style.top = mouseY + 'px';
+  cursorTrail.style.left = mouseX + 'px';
+  cursorTrail.style.top = mouseY + 'px';
+});
+
+document.addEventListener('mousedown', () => cursor.style.transform = 'translate(-50%,-50%) scale(0.7)');
+document.addEventListener('mouseup', () => cursor.style.transform = 'translate(-50%,-50%) scale(1)');
+
+// Cursor hover em elementos interativos
+document.querySelectorAll('a, button, .step-card, .sev-card, .upload-area').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.style.transform = 'translate(-50%,-50%) scale(1.6)';
+    cursorTrail.style.transform = 'translate(-50%,-50%) scale(1.4)';
+  });
+  el.addEventListener('mouseleave', () => {
+    cursor.style.transform = 'translate(-50%,-50%) scale(1)';
+    cursorTrail.style.transform = 'translate(-50%,-50%) scale(1)';
+  });
+});
+
+// ---- NAVBAR SCROLL ---- //
+const navbar = document.getElementById('navbar');
+
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 50) {
+    navbar.classList.add('scrolled');
+  } else {
+    navbar.classList.remove('scrolled');
+  }
+});
+
+// ---- HAMBURGER / MOBILE MENU ---- //
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('active');
+  mobileMenu.classList.toggle('open');
+  document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+});
+
+function closeMobileMenu() {
+  hamburger.classList.remove('active');
+  mobileMenu.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ---- CONTADOR ANIMADO ---- //
+function animateCounter(el, target, duration = 1800) {
+  let start = 0;
+  const step = target / (duration / 16);
+  const timer = setInterval(() => {
+    start += step;
+    if (start >= target) {
+      start = target;
+      clearInterval(timer);
+    }
+    el.textContent = Math.floor(start).toLocaleString('pt-BR');
+  }, 16);
+}
+
+// ---- INTERSECTION OBSERVER — Animações de entrada ---- //
+const observerOptions = {
+  threshold: 0.15,
+  rootMargin: '0px 0px -40px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+
+      // Contadores hero
+      if (entry.target.classList.contains('hero')) {
+        entry.target.querySelectorAll('.stat-number').forEach(el => {
+          const target = parseInt(el.dataset.target);
+          animateCounter(el, target, 1200);
+        });
+      }
+
+      // Contadores de estatísticas
+      if (entry.target.classList.contains('estatisticas')) {
+        entry.target.querySelectorAll('.big-number').forEach(el => {
+          const target = parseInt(el.dataset.target);
+          if (target) animateCounter(el, target, 2000);
+        });
+        // Barras
+        setTimeout(() => {
+          entry.target.querySelectorAll('.bar-fill').forEach(bar => {
+            bar.style.width = bar.dataset.width + '%';
+          });
+        }, 300);
+      }
+
+      observer.unobserve(entry.target);
+    }
+  });
+}, observerOptions);
+
+// Observar seções
+document.querySelectorAll('.hero, .sobre, .como-funciona, .severidade, .estatisticas, .demo, .contato').forEach(section => {
+  observer.observe(section);
+});
+
+// Observer para step-cards e sev-cards (stagger)
+const cardObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const cards = entry.target.querySelectorAll('.step-card, .sev-card, .big-stat');
+      cards.forEach((card, i) => {
+        setTimeout(() => {
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        }, i * 120);
+      });
+      cardObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+// Inicializar cards como invisíveis para animar
+document.querySelectorAll('.step-card, .sev-card, .big-stat').forEach(card => {
+  card.style.opacity = '0';
+  card.style.transform = 'translateY(24px)';
+  card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+});
+
+document.querySelectorAll('.steps-container, .severity-cards, .stats-grid').forEach(container => {
+  cardObserver.observe(container);
+});
+
+// ---- DRAG & DROP UPLOAD ---- //
+const uploadArea = document.getElementById('uploadArea');
+const fileInput = document.getElementById('fileInput');
+
+uploadArea.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  uploadArea.classList.add('drag-over');
+});
+
+uploadArea.addEventListener('dragleave', () => {
+  uploadArea.classList.remove('drag-over');
+});
+
+uploadArea.addEventListener('drop', (e) => {
+  e.preventDefault();
+  uploadArea.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) {
+    handleFileUpload(file);
+  } else {
+    showToast('⚠️ Por favor, envie apenas arquivos de imagem.');
+  }
+});
+
+fileInput.addEventListener('change', (e) => {
+  if (e.target.files[0]) {
+    handleFileUpload(e.target.files[0]);
+  }
+});
+
+function handleFileUpload(file) {
+  const uploadIcon = uploadArea.querySelector('.upload-icon svg');
+  const uploadTitle = uploadArea.querySelector('.upload-title');
+  const uploadSub = uploadArea.querySelector('.upload-sub');
+
+  uploadTitle.textContent = `✓ Arquivo carregado: ${file.name}`;
+  uploadSub.textContent = `${(file.size / 1024).toFixed(1)} KB — Pronto para análise`;
+  uploadArea.style.borderColor = 'var(--success)';
+  uploadArea.style.background = 'rgba(63,185,80,0.04)';
+  if (uploadIcon) uploadIcon.style.color = 'var(--success)';
+
+  showToast(`📷 Imagem "${file.name}" carregada com sucesso!`);
+}
+
+// ---- DEMO IA (SIMULAÇÃO) ---- //
+const severidadeOptions = [
+  {
+    label: 'LEVE',
+    color: 'var(--success)',
+    confidence: 91,
+    resource: 'Viatura de Trânsito',
+    time: '1.2s'
+  },
+  {
+    label: 'MODERADO',
+    color: 'var(--warning)',
+    confidence: 87,
+    resource: 'SAMU + Guarda Municipal',
+    time: '1.7s'
+  },
+  {
+    label: 'CRÍTICO',
+    color: 'var(--danger)',
+    confidence: 96,
+    resource: 'SAMU + Bombeiros + Polícia',
+    time: '1.4s'
+  }
+];
+
+function pickSeverityFromText(text) {
+  const lower = text.toLowerCase();
+  if (
+    lower.includes('crítico') || lower.includes('critico') ||
+    lower.includes('inconsciente') || lower.includes('preso') ||
+    lower.includes('fumaça') || lower.includes('fumaca') ||
+    lower.includes('fogo') || lower.includes('incêndio') ||
+    lower.includes('grave') || lower.includes('morto') ||
+    lower.includes('destroços')
+  ) return severidadeOptions[2];
+
+  if (
+    lower.includes('airbag') || lower.includes('deformação') ||
+    lower.includes('ferido') || lower.includes('dor') ||
+    lower.includes('moderado') || lower.includes('bloqueio') ||
+    lower.includes('socorros')
+  ) return severidadeOptions[1];
+
+  return severidadeOptions[0];
+}
+
+function runDemo() {
+  const desc = document.getElementById('descInput').value.trim();
+  const fileUploaded = fileInput.files[0] || uploadArea.style.borderColor === 'var(--success)';
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  const demoResult = document.getElementById('demoResult');
+
+  if (!desc && !fileUploaded) {
+    showToast('⚠️ Insira uma descrição ou faça upload de uma imagem.');
+    return;
+  }
+
+  // Estado de loading
+  analyzeBtn.classList.add('loading');
+  analyzeBtn.querySelector('span').textContent = 'Analisando';
+  demoResult.style.display = 'none';
+
+  const delay = 1800 + Math.random() * 800;
+
+  setTimeout(() => {
+    // Escolher severidade baseada no texto (ou aleatório se só imagem)
+    let result;
+    if (desc) {
+      result = pickSeverityFromText(desc);
+    } else {
+      result = severidadeOptions[Math.floor(Math.random() * severidadeOptions.length)];
+    }
+
+    // Preencher resultado
+    const now = new Date();
+    document.getElementById('resultTime').textContent =
+      `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+
+    const severityEl = document.getElementById('resultSeverity');
+    severityEl.textContent = result.label;
+    severityEl.style.color = result.color;
+
+    document.getElementById('confPct').textContent = result.confidence + '%';
+    document.getElementById('confPct').style.color = result.color;
+
+    const confBar = document.getElementById('confBar');
+    confBar.style.background = result.color;
+    confBar.style.width = '0%';
+
+    document.getElementById('suggestedResource').textContent = result.resource;
+    document.getElementById('analysisTime').textContent = result.time;
+
+    // Mostrar resultado
+    demoResult.style.display = 'block';
+
+    // Animar barra
+    setTimeout(() => {
+      confBar.style.width = result.confidence + '%';
+    }, 100);
+
+    // Resetar botão
+    analyzeBtn.classList.remove('loading');
+    analyzeBtn.querySelector('span').textContent = 'Analisar com IA';
+
+    showToast(`✅ Análise concluída — Severidade: ${result.label}`);
+
+  }, delay);
+}
+
+// ---- CONTATO ---- //
+function submitContact() {
+  const inputs = document.querySelectorAll('.contato-form input, .contato-form textarea');
+  let valid = true;
+  inputs.forEach(input => {
+    if (!input.value.trim()) {
+      valid = false;
+      input.style.borderColor = 'var(--danger)';
+      setTimeout(() => { input.style.borderColor = ''; }, 2000);
+    }
+  });
+
+  if (!valid) {
+    showToast('⚠️ Por favor, preencha todos os campos.');
+    return;
+  }
+
+  const btn = document.querySelector('.contato-form .btn-primary');
+  btn.classList.add('loading');
+  btn.querySelector('span').textContent = 'Enviando';
+
+  setTimeout(() => {
+    btn.classList.remove('loading');
+    btn.querySelector('span').textContent = 'Enviar Mensagem';
+    inputs.forEach(input => { input.value = ''; });
+    showToast('✅ Mensagem enviada com sucesso! Em breve entraremos em contato.');
+  }, 1800);
+}
+
+// ---- TOAST ---- //
+let toastTimeout;
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3500);
+}
+
+// ---- SMOOTH SCROLL para links internos ---- //
+document.querySelectorAll('a[href^="#"]').forEach(link => {
+  link.addEventListener('click', (e) => {
+    const target = document.querySelector(link.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      const offset = 80;
+      const top = target.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+  });
+});
+
+// ---- PARALLAX SUTIL no Hero ---- //
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY;
+  const heroContent = document.querySelector('.hero-content');
+  const heroVisual = document.querySelector('.hero-visual');
+
+  if (heroContent && scrollY < window.innerHeight) {
+    heroContent.style.transform = `translateY(${scrollY * 0.08}px)`;
+    if (heroVisual) heroVisual.style.transform = `translateY(${scrollY * 0.04}px)`;
+  }
+});
+
+// ---- RIPPLE EFFECT nos botões ---- //
+document.querySelectorAll('.btn-primary, .btn-secondary, .nav-cta').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    const rect = this.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    const size = Math.max(rect.width, rect.height);
+    const x = e.clientX - rect.left - size / 2;
+    const y = e.clientY - rect.top - size / 2;
+
+    ripple.style.cssText = `
+      position: absolute;
+      width: ${size}px;
+      height: ${size}px;
+      left: ${x}px;
+      top: ${y}px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      transform: scale(0);
+      animation: ripple-anim 0.5s ease-out;
+      pointer-events: none;
+    `;
+
+    this.style.position = 'relative';
+    this.style.overflow = 'hidden';
+    this.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 500);
+  });
+});
+
+// Keyframe de ripple via JS
+const styleEl = document.createElement('style');
+styleEl.textContent = `
+  @keyframes ripple-anim {
+    to { transform: scale(2.5); opacity: 0; }
+  }
+`;
+document.head.appendChild(styleEl);
+
+// ---- ACTIVE SECTION NO SCROLL (navbar highlight) ---- //
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(section => {
+    const top = section.offsetTop - 120;
+    if (window.scrollY >= top) {
+      current = section.getAttribute('id');
+    }
+  });
+
+  navLinks.forEach(link => {
+    link.style.color = '';
+    if (link.getAttribute('href') === `#${current}`) {
+      link.style.color = 'var(--accent)';
+    }
+  });
+});
+
+// ---- INIT: hero stats counter no load ---- //
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.querySelectorAll('.stat-number').forEach(el => {
+      const target = parseInt(el.dataset.target);
+      if (target) animateCounter(el, target, 1400);
+    });
+  }, 600);
+});
+
+console.log(
+  '%c⬡ TrafficAI%c — Sistema de Detecção de Severidade em Acidentes\n%cProtótipo Front-End • Pronto para integração com IA',
+  'color: #3b82f6; font-size: 18px; font-weight: bold;',
+  'color: #e6edf3; font-size: 18px;',
+  'color: #7d8590; font-size: 12px;'
+);
