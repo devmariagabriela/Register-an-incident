@@ -108,7 +108,7 @@ The system follows a four-stage automated pipeline:
 | `seatbelt` | Single strongest predictor of injury severity |
 | `hour` | Peak accident time: 6 PM |
 | `road_type` | Contextual predictor |
-| `severity` | **Target** — Light / Moderate / Critical |
+| `severity` | **Target** - Light / Moderate / Critical |
 
 ### Severity distribution
 
@@ -118,7 +118,7 @@ Light     █████████████████████░░�
 Critical  █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  ~0.5%
 ```
 
-> The significant class imbalance — critical cases represent only 0.5% of records — is the main modeling challenge and requires special handling (see [Model](#model)).
+> The significant class imbalance critical cases represent only 0.5% of records is the main modeling challenge and requires special handling (see [Model](#model)).
 
 ---
 
@@ -181,7 +181,7 @@ Raw CSV
 
 ### Why Recall?
 
-In this context, **a false negative on a critical accident is far more dangerous than a false positive**. Missing a life-threatening case because the model underestimated severity could cost lives. Therefore, **Recall for the critical class** is the primary optimization target — ahead of overall accuracy.
+In this context, **a false negative on a critical accident is far more dangerous than a false positive**. Missing a life-threatening case because the model underestimated severity could cost lives. Therefore, **Recall for the critical class** is the primary optimization target ahead of overall accuracy.
 
 ---
 
