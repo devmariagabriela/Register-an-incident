@@ -9,7 +9,7 @@
 ![License](https://img.shields.io/badge/license-MIT-7d8590?style=flat-square)
 ![Year](https://img.shields.io/badge/base%20year-2020-7d8590?style=flat-square)
 
-**An AI-powered platform for real-time classification of traffic accident severity, built for M.E. II.**
+**An AI-powered platform for real-time classification of traffic accident severity.**
 
 [Live Demo](#demo) · [How It Works](#how-it-works) · [Dataset](#dataset) · [Model](#model) · [Team](#team)
 
@@ -58,7 +58,7 @@ The front-end platform (`index.html`) includes a fully interactive demo section 
 ```bash
 # Clone the repository
 git clone https://github.com/devmariagabriela/trafficai.git
-cd trafficai
+cd register-an-incident
 
 # Open in browser (no build step required)
 open index.html
@@ -81,13 +81,13 @@ The system follows a four-stage automated pipeline:
 └─────────────────┘    └──────────────────┘    └─────────────────┘    └──────────────────┘
 ```
 
-**Stage 1 — Data Capture:** Images from traffic cameras, drones, smartphones, or text descriptions submitted by users.
+**Stage 1 - Data Capture:** Images from traffic cameras, drones, smartphones, or text descriptions submitted by users.
 
-**Stage 2 — Preprocessing:** The pipeline normalizes inputs, extracts contextual metadata (time, location, weather), encodes categorical variables, and treats null values.
+**Stage 2 - Preprocessing:** The pipeline normalizes inputs, extracts contextual metadata (time, location, weather), encodes categorical variables, and treats null values.
 
-**Stage 3 — AI Inference:** The trained classifier analyzes damage patterns, vehicle positioning, debris distribution, and contextual factors to predict severity.
+**Stage 3 - AI Inference:** The trained classifier analyzes damage patterns, vehicle positioning, debris distribution, and contextual factors to predict severity.
 
-**Stage 4 — Classification & Alert:** Output is mapped to one of three severity levels. Alerts are dispatched to the appropriate emergency services.
+**Stage 4 - Classification & Alert:** Output is mapped to one of three severity levels. Alerts are dispatched to the appropriate emergency services.
 
 ---
 
@@ -321,7 +321,7 @@ From the exploratory analysis of 22,643 records:
 
 ## License
 
-This project was developed for academic purposes as part of the M.E. II course. Dataset and results are for educational use only.
+This project was developed for academic purposes as part of the Software Analysis and Development 4th Semester. Dataset and results are for educational use only.
 
 ---
 
