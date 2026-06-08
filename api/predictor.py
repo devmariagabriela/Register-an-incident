@@ -17,6 +17,7 @@ except ImportError:
 
 ROOT = Path(__file__).resolve().parent.parent
 MODEL_CANDIDATES = (
+    ROOT / "api" / "models" / "trained_accident_model.pkcls",
     ROOT / "models" / "modelo_acidente_treinado.pkcls",
     ROOT / "models" / "RandomForestModelTrained.pkcls",
     ROOT / "modelo_acidente_treinado.pkcls",
@@ -242,17 +243,23 @@ def _predict_with_orange(model, features: dict[str, Any]) -> tuple[str, int]:
 def predict_accident(
     description: str = "",
     image_provided: bool = False,
+    fields: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     features = _extract_features(description) if description else _extract_features("")
+    if fields:
+        for key, value in fields.items():
+            if value is not None and value != "":
+                features[key] = value
     model = _load_model()
     source = "heuristic"
 
-    if model is not None and description:
+    has_input = bool(description) or bool(fields)
+    if model is not None and has_input:
         try:
             severity, confidence = _predict_with_orange(model, features)
             source = "model"
         except Exception:
-            severity, confidence = _heuristic_severity(description)
+            severity, confidence = _heuristic_severity(description or "")
     elif description:
         severity, confidence = _heuristic_severity(description)
     else:

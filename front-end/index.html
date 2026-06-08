@@ -528,9 +528,83 @@
         <div class="demo-divider"><span>ou</span></div>
 
         <div class="demo-form">
+          <div class="demo-api-status" id="apiStatus">
+            <span class="api-status-dot"></span>
+            <span class="api-status-text">Verificando API...</span>
+          </div>
+
           <label>Descreva o acidente textualmente</label>
           <textarea id="descInput" placeholder="Ex: Colisão entre dois veículos na Av. Agamenon Magalhães. Airbag disparado, fumaça visível, uma vítima inconsciente..."></textarea>
-          <button class="btn-primary full-width" id="analyzeBtn" onclick="runDemo()">
+
+          <fieldset class="demo-fields">
+            <legend>Dados contextuais <span class="fields-optional">(opcional)</span></legend>
+            <div class="fields-grid">
+              <div class="field-group">
+                <label for="fieldIdade">Idade</label>
+                <input type="number" id="fieldIdade" min="1" max="120" placeholder="35" />
+              </div>
+              <div class="field-group">
+                <label for="fieldSexo">Sexo</label>
+                <select id="fieldSexo">
+                  <option value="">Automático</option>
+                  <option value="M">Masculino</option>
+                  <option value="F">Feminino</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label for="fieldEspecie">Veículo</label>
+                <select id="fieldEspecie">
+                  <option value="">Automático</option>
+                  <option value="Automóvel">Automóvel</option>
+                  <option value="Motocicleta">Motocicleta</option>
+                  <option value="Caminhão">Caminhão</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label for="fieldCinto">Cinto de segurança</label>
+                <select id="fieldCinto">
+                  <option value="">Automático</option>
+                  <option value="Sim">Sim</option>
+                  <option value="Não">Não</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label for="fieldCondutor">Condutor</label>
+                <select id="fieldCondutor">
+                  <option value="">Automático</option>
+                  <option value="Sim">Sim</option>
+                  <option value="Não">Não</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label for="fieldPedestre">Pedestre envolvido</label>
+                <select id="fieldPedestre">
+                  <option value="">Automático</option>
+                  <option value="Sim">Sim</option>
+                  <option value="Não">Não</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label for="fieldPassageiro">Passageiro envolvido</label>
+                <select id="fieldPassageiro">
+                  <option value="">Automático</option>
+                  <option value="Sim">Sim</option>
+                  <option value="Não">Não</option>
+                </select>
+              </div>
+              <div class="field-group">
+                <label for="fieldTurno">Turno</label>
+                <select id="fieldTurno">
+                  <option value="">Automático</option>
+                  <option value="Manhã">Manhã</option>
+                  <option value="Tarde">Tarde</option>
+                  <option value="Noite">Noite</option>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+
+          <button class="btn-primary full-width" id="analyzeBtn" type="button">
             <span>Analisar com IA</span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </button>

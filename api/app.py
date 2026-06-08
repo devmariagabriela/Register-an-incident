@@ -40,12 +40,17 @@ def predict():
     payload = request.get_json(silent=True) or {}
     description = (payload.get("description") or "").strip()
     image_provided = bool(payload.get("image"))
+    fields = payload.get("fields") or {}
 
-    if not description and not image_provided:
-        return jsonify({"error": "Informe uma descrição ou envie uma imagem."}), 400
+    if not description and not image_provided and not fields:
+        return jsonify({"error": "Informe uma descrição, dados contextuais ou envie uma imagem."}), 400
 
     start = time.perf_counter()
-    result = predict_accident(description=description, image_provided=image_provided)
+    result = predict_accident(
+        description=description,
+        image_provided=image_provided,
+        fields=fields,
+    )
     elapsed_ms = round((time.perf_counter() - start) * 1000, 1)
 
     return jsonify(

@@ -172,6 +172,14 @@ fileInput.addEventListener('change', (e) => {
   }
 });
 
+document.getElementById('analyzeBtn').addEventListener('click', runDemo);
+document.getElementById('descInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    runDemo();
+  }
+});
+
 let uploadedFile = null;
 
 function handleFileUpload(file) {
@@ -191,7 +199,9 @@ function handleFileUpload(file) {
 }
 
 // ---- DEMO IA (API Flask) ---- //
-const API_BASE = window.location.origin;
+const API_BASE = window.location.protocol === 'file:'
+  ? 'http://127.0.0.1:5000'
+  : window.location.origin;
 const SEVERITY_COLORS = {
   LEVE: 'var(--success)',
   MODERADO: 'var(--warning)',
@@ -200,6 +210,48 @@ const SEVERITY_COLORS = {
 
 function severityColor(label) {
   return SEVERITY_COLORS[label] || 'var(--accent)';
+}
+
+function collectFormFields() {
+  const fields = {};
+  const idade = document.getElementById('fieldIdade').value.trim();
+  const sexo = document.getElementById('fieldSexo').value;
+  const especie = document.getElementById('fieldEspecie').value;
+  const cinto = document.getElementById('fieldCinto').value;
+  const condutor = document.getElementById('fieldCondutor').value;
+  const pedestre = document.getElementById('fieldPedestre').value;
+  const passageiro = document.getElementById('fieldPassageiro').value;
+  const turno = document.getElementById('fieldTurno').value;
+
+  if (idade) fields.idade = parseInt(idade, 10);
+  if (sexo) fields.sexo = sexo;
+  if (especie) fields.especie_veiculo = especie;
+  if (cinto) fields.cinto_seguranca = cinto;
+  if (condutor) fields.condutor = condutor;
+  if (pedestre) fields.pedestre = pedestre;
+  if (passageiro) fields.passageiro = passageiro;
+  if (turno) fields.turno = turno;
+
+  return fields;
+}
+
+function updateApiStatus(online, info = {}) {
+  const statusEl = document.getElementById('apiStatus');
+  if (!statusEl) return;
+
+  const dot = statusEl.querySelector('.api-status-dot');
+  const text = statusEl.querySelector('.api-status-text');
+
+  if (online) {
+    statusEl.classList.add('online');
+    statusEl.classList.remove('offline');
+    const mode = info.model_loaded ? 'Modelo .pkcls ativo' : 'Heurística (sem modelo)';
+    text.textContent = `API conectada — ${mode}`;
+  } else {
+    statusEl.classList.add('offline');
+    statusEl.classList.remove('online');
+    text.textContent = 'API offline — execute: python api/app.py';
+  }
 }
 
 function renderAnalysisResult(data) {
@@ -242,8 +294,8 @@ async function runDemo() {
   const analyzeBtn = document.getElementById('analyzeBtn');
   const demoResult = document.getElementById('demoResult');
 
-  if (!desc && !hasImage) {
-    showToast('⚠️ Insira uma descrição ou faça upload de uma imagem.');
+  if (!desc && !hasImage && Object.keys(collectFormFields()).length === 0) {
+    showToast('⚠️ Insira uma descrição, preencha os dados contextuais ou faça upload de uma imagem.');
     return;
   }
 
@@ -258,6 +310,7 @@ async function runDemo() {
       body: JSON.stringify({
         description: desc,
         image: hasImage,
+        fields: collectFormFields(),
       }),
     });
 
@@ -415,6 +468,7 @@ window.addEventListener('load', () => {
 fetch(`${API_BASE}/api/health`)
   .then((res) => res.json())
   .then((info) => {
+    updateApiStatus(true, info);
     const mode = info.model_loaded ? 'modelo Orange carregado' : 'heurística (sem modelo)';
     console.log(
       `%c⬡ TrafficAI%c — API ativa • ${mode}`,
@@ -423,5 +477,6 @@ fetch(`${API_BASE}/api/health`)
     );
   })
   .catch(() => {
+    updateApiStatus(false);
     console.warn('TrafficAI: API Flask não detectada. Execute: python api/app.py');
   });
