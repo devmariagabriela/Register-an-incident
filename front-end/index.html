@@ -509,7 +509,7 @@
     <div class="container">
       <div class="section-tag">// ANÁLISE DEMONSTRATIVA</div>
       <h2 class="section-title">Teste o <em>Sistema</em></h2>
-      <p class="section-subtitle">Envie uma imagem ou descreva o acidente e veja a IA em ação (simulação)</p>
+      <p class="section-subtitle">Envie uma imagem ou descreva o acidente e veja a classificação em tempo real</p>
 
       <div class="demo-wrapper">
         <div class="upload-area" id="uploadArea">
@@ -558,9 +558,13 @@
                 <span class="detail-label">Tempo de análise</span>
                 <span class="detail-val" id="analysisTime"></span>
               </div>
+              <div class="detail-item">
+                <span class="detail-label">Fonte da inferência</span>
+                <span class="detail-val" id="analysisSource"></span>
+              </div>
             </div>
           </div>
-          <p class="result-disclaimer">⚠️ Este é um resultado simulado para fins de demonstração. Nenhuma IA real foi executada.</p>
+          <p class="result-disclaimer">Resultado gerado pela API Flask com modelo Orange ou heurística textual, conforme disponibilidade.</p>
         </div>
       </div>
     </div>

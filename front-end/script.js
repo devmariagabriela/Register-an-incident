@@ -172,7 +172,11 @@ fileInput.addEventListener('change', (e) => {
   }
 });
 
+let uploadedFile = null;
+
 function handleFileUpload(file) {
+  uploadedFile = file;
+
   const uploadIcon = uploadArea.querySelector('.upload-icon svg');
   const uploadTitle = uploadArea.querySelector('.upload-title');
   const uploadSub = uploadArea.querySelector('.upload-sub');
@@ -186,113 +190,91 @@ function handleFileUpload(file) {
   showToast(`📷 Imagem "${file.name}" carregada com sucesso!`);
 }
 
-// ---- DEMO IA (SIMULAÇÃO) ---- //
-const severidadeOptions = [
-  {
-    label: 'LEVE',
-    color: 'var(--success)',
-    confidence: 91,
-    resource: 'Viatura de Trânsito',
-    time: '1.2s'
-  },
-  {
-    label: 'MODERADO',
-    color: 'var(--warning)',
-    confidence: 87,
-    resource: 'SAMU + Guarda Municipal',
-    time: '1.7s'
-  },
-  {
-    label: 'CRÍTICO',
-    color: 'var(--danger)',
-    confidence: 96,
-    resource: 'SAMU + Bombeiros + Polícia',
-    time: '1.4s'
-  }
-];
+// ---- DEMO IA (API Flask) ---- //
+const API_BASE = window.location.origin;
+const SEVERITY_COLORS = {
+  LEVE: 'var(--success)',
+  MODERADO: 'var(--warning)',
+  CRÍTICO: 'var(--danger)',
+};
 
-function pickSeverityFromText(text) {
-  const lower = text.toLowerCase();
-  if (
-    lower.includes('crítico') || lower.includes('critico') ||
-    lower.includes('inconsciente') || lower.includes('preso') ||
-    lower.includes('fumaça') || lower.includes('fumaca') ||
-    lower.includes('fogo') || lower.includes('incêndio') ||
-    lower.includes('grave') || lower.includes('morto') ||
-    lower.includes('destroços')
-  ) return severidadeOptions[2];
-
-  if (
-    lower.includes('airbag') || lower.includes('deformação') ||
-    lower.includes('ferido') || lower.includes('dor') ||
-    lower.includes('moderado') || lower.includes('bloqueio') ||
-    lower.includes('socorros')
-  ) return severidadeOptions[1];
-
-  return severidadeOptions[0];
+function severityColor(label) {
+  return SEVERITY_COLORS[label] || 'var(--accent)';
 }
 
-function runDemo() {
+function renderAnalysisResult(data) {
+  const demoResult = document.getElementById('demoResult');
+  const color = severityColor(data.severity);
+
+  const now = new Date();
+  document.getElementById('resultTime').textContent =
+    `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+
+  const severityEl = document.getElementById('resultSeverity');
+  severityEl.textContent = data.severity;
+  severityEl.style.color = color;
+
+  document.getElementById('confPct').textContent = `${data.confidence}%`;
+  document.getElementById('confPct').style.color = color;
+
+  const confBar = document.getElementById('confBar');
+  confBar.style.background = color;
+  confBar.style.width = '0%';
+
+  document.getElementById('suggestedResource').textContent = data.resource;
+  document.getElementById('analysisTime').textContent = data.analysis_time;
+
+  const sourceEl = document.getElementById('analysisSource');
+  if (sourceEl) {
+    sourceEl.textContent = data.source === 'model' ? 'Modelo Orange (.pkcls)' : 'Heurística textual';
+  }
+
+  demoResult.style.display = 'block';
+
+  setTimeout(() => {
+    confBar.style.width = `${data.confidence}%`;
+  }, 100);
+}
+
+async function runDemo() {
   const desc = document.getElementById('descInput').value.trim();
-  const fileUploaded = fileInput.files[0] || uploadArea.style.borderColor === 'var(--success)';
+  const hasImage = Boolean(uploadedFile || fileInput.files[0]);
   const analyzeBtn = document.getElementById('analyzeBtn');
   const demoResult = document.getElementById('demoResult');
 
-  if (!desc && !fileUploaded) {
+  if (!desc && !hasImage) {
     showToast('⚠️ Insira uma descrição ou faça upload de uma imagem.');
     return;
   }
 
-  // Estado de loading
   analyzeBtn.classList.add('loading');
   analyzeBtn.querySelector('span').textContent = 'Analisando';
   demoResult.style.display = 'none';
 
-  const delay = 1800 + Math.random() * 800;
+  try {
+    const response = await fetch(`${API_BASE}/api/predict`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        description: desc,
+        image: hasImage,
+      }),
+    });
 
-  setTimeout(() => {
-    // Escolher severidade baseada no texto (ou aleatório se só imagem)
-    let result;
-    if (desc) {
-      result = pickSeverityFromText(desc);
-    } else {
-      result = severidadeOptions[Math.floor(Math.random() * severidadeOptions.length)];
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Não foi possível concluir a análise.');
     }
 
-    // Preencher resultado
-    const now = new Date();
-    document.getElementById('resultTime').textContent =
-      `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
-
-    const severityEl = document.getElementById('resultSeverity');
-    severityEl.textContent = result.label;
-    severityEl.style.color = result.color;
-
-    document.getElementById('confPct').textContent = result.confidence + '%';
-    document.getElementById('confPct').style.color = result.color;
-
-    const confBar = document.getElementById('confBar');
-    confBar.style.background = result.color;
-    confBar.style.width = '0%';
-
-    document.getElementById('suggestedResource').textContent = result.resource;
-    document.getElementById('analysisTime').textContent = result.time;
-
-    // Mostrar resultado
-    demoResult.style.display = 'block';
-
-    // Animar barra
-    setTimeout(() => {
-      confBar.style.width = result.confidence + '%';
-    }, 100);
-
-    // Resetar botão
+    renderAnalysisResult(data);
+    showToast(`✅ Análise concluída — Severidade: ${data.severity}`);
+  } catch (err) {
+    showToast(`⚠️ ${err.message || 'Erro ao contactar a API. Inicie o servidor Flask.'}`);
+  } finally {
     analyzeBtn.classList.remove('loading');
     analyzeBtn.querySelector('span').textContent = 'Analisar com IA';
-
-    showToast(`✅ Análise concluída — Severidade: ${result.label}`);
-
-  }, delay);
+  }
 }
 
 // ---- CONTATO ---- //
@@ -430,9 +412,16 @@ window.addEventListener('load', () => {
   }, 600);
 });
 
-console.log(
-  '%c⬡ TrafficAI%c — Sistema de Detecção de Severidade em Acidentes\n%cProtótipo Front-End • Pronto para integração com IA',
-  'color: #3b82f6; font-size: 18px; font-weight: bold;',
-  'color: #e6edf3; font-size: 18px;',
-  'color: #7d8590; font-size: 12px;'
-);
+fetch(`${API_BASE}/api/health`)
+  .then((res) => res.json())
+  .then((info) => {
+    const mode = info.model_loaded ? 'modelo Orange carregado' : 'heurística (sem modelo)';
+    console.log(
+      `%c⬡ TrafficAI%c — API ativa • ${mode}`,
+      'color: #3b82f6; font-size: 18px; font-weight: bold;',
+      'color: #e6edf3; font-size: 18px;'
+    );
+  })
+  .catch(() => {
+    console.warn('TrafficAI: API Flask não detectada. Execute: python api/app.py');
+  });
