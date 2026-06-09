@@ -19,7 +19,7 @@
 
 ## Overview
 
-TrafficAI is a full-stack prototype that applies machine learning to classify traffic accidents into three levels — Light, Moderate, and Critical enabling faster and more accurate emergency response dispatch.
+TrafficAI is a full-stack prototype that applies machine learning to classify traffic accidents into three levels: Light, Moderate, and Critical enabling faster and more accurate emergency response dispatch.
 
 Built on a real 2020 dataset with 22,643 records, the system was trained using Orange Data Mining with algorithms including Random Forest and XGBoost. The front-end interface allows users to submit accident images or text descriptions and receive a severity classification with confidence score and suggested emergency resources.
 
@@ -55,11 +55,11 @@ The system follows a four-stage automated pipeline:
 
 Stage 1 - Capture: Images from traffic cameras, drones, smartphones, or text descriptions submitted by users.
 
-Stage 2 — Preprocessing: The pipeline normalizes inputs, extracts contextual metadata (time, location, weather), encodes categorical variables, and treats null values.
+Stage 2 - Preprocessing: The pipeline normalizes inputs, extracts contextual metadata (time, location, weather), encodes categorical variables, and treats null values.
 
-Stage 3 — Inference: The trained classifier analyzes damage patterns, vehicle positioning, debris distribution, and contextual factors to predict severity.
+Stage 3 - Inference: The trained classifier analyzes damage patterns, vehicle positioning, debris distribution, and contextual factors to predict severity.
 
-Stage 4 — Classification & Alert: Output is mapped to one of three severity levels. Alerts are dispatched to the appropriate emergency services.
+Stage 4 - Classification & Alert: Output is mapped to one of three severity levels. Alerts are dispatched to the appropriate emergency services.
 
 ---
 
@@ -90,7 +90,7 @@ Light     █████████████████████░░�
 Critical  █░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  ~0.5%
 ```
 
-> The significant class imbalance — critical cases represent only 0.5% of records is the main modeling challenge and requires special handling (see [Model](#model)).
+> The significant class imbalance critical cases represent only 0.5% of records is the main modeling challenge and requires special handling (see [Model](#model)).
 
 ---
 
@@ -101,13 +101,13 @@ Critical  █░░░░░░░░░░░░░░░░░░░░░░�
 The model was trained using [Orange Data Mining](https://orangedatamining.com/), a visual workflow tool for machine learning. The workflow file is available at:
 
 ```
-Deteccao_Severidade_treino.ows
+severity_detection_training.ows
 ```
 
 The trained model is exported as:
 
 ```
-modelo_acidente_treinado.pkcls
+trained_accident_model.pkcls
 ```
 
 ### Why Recall?
@@ -116,27 +116,6 @@ In this context, a false negative on a critical accident is far more dangerous t
 
 ---
 
-## Project Structure
-
-```
-trafficai/
-│
-├── index.html                          # Main web interface
-├── style.css                           # Styles (dark theme, animations)
-├── script.js                           # Interactive logic, demo simulation
-│
-├── api/
-│   ├── App.py                          # Flask backend
-│   └── requirements.txt               # Python dependencies
-│
-├── Deteccao_Severidade_treino.ows      # Orange Data Mining workflow
-├── modelo_acidente_treinado.pkcls      # Trained classifier (Orange format)
-│
-└── DETECTION_OF_SEVERITY_IN_
-    TRAFFIC_ACCIDENTS.pdf               # Project presentation (slides)
-```
-
----
 
 ## Getting Started
 
@@ -244,19 +223,6 @@ Class imbalance
 
 ---
 
-## Team
-
-| Name | Role |
-|---|---|
-| Adriely Natasha Martins Andrade | Data Analysis & Presentation |
-| Hilton Alves Nery | Statistical Analysis |
-| Miguel Luiz Lins de Oliveira | AI model training & Explanation |
-| Maria Gabriela da Silva Pereira | Data Analysis & Presentation |
-| Matheus Leonardo Araujo de Mesquita Silva | Front-End Development & Code Presentation |
-
-Instructors: Jonathan Bandeira da Silva and Oscar Agra Gonçalves
-
----
 
 ## License
 
