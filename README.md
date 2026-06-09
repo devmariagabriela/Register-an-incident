@@ -227,13 +227,3 @@ Class imbalance
 ## License
 
 This project was developed for academic purposes as part of the Software Analysis and Development 4th Semester. Dataset and results are for educational use only.
-
----
-
-<div align="center">
-
-⬡ TrafficAI: Built to save lives through faster emergency response.
-
-*Artificial intelligence applied to road safety.*
-
-</div>
