@@ -11,7 +11,7 @@
 
 **An AI-powered platform for real-time classification of traffic accident severity.**
 
-[Demo](#demo) · [How It Works](#how-it-works) · [Dataset](#dataset) · [Model](#model) · [Team](#team)
+[Demo](#demo) · [How It Works](#how-it-works) · [Dataset](#dataset) · [Model](#model)
 
 ---
 
